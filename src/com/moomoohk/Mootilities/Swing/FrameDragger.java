@@ -1,4 +1,4 @@
-package com.moomoohk.Mootilities.FrameDragger;
+package com.moomoohk.Mootilities.Swing;
 
 import java.awt.Component;
 import java.awt.GraphicsConfiguration;
@@ -11,6 +11,18 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 
+/**
+ * A simple tool that enables the dragging of windows around the screen.
+ * <p>
+ * Usage:
+ * 
+ * <pre>
+ * new FrameDragger().applyTo(window);
+ * </pre>
+ * 
+ * @author Meshulam Silk (moomoohk@ymail.com)
+ * @since Dec 24, 2013
+ */
 public class FrameDragger extends MouseAdapter implements MouseMotionListener
 {
 	private Component c;
@@ -60,11 +72,29 @@ public class FrameDragger extends MouseAdapter implements MouseMotionListener
 		this.mouseDownCompCoords = e.getPoint();
 	}
 
+	/**
+	 * Will make a Component draggable.
+	 * 
+	 * @param c
+	 *            Component to make draggable
+	 */
 	public void applyTo(Component c)
 	{
 		applyTo(c, null, null, null);
 	}
 
+	/**
+	 * Will make a Component draggable and add hooks that will be run at different events.
+	 * 
+	 * @param c
+	 *            Component to make draggable
+	 * @param onPress
+	 *            Hook that will run when the mouse presses on the component
+	 * @param onRelease
+	 *            Hook that will run when the mouse releases the component
+	 * @param onDrag
+	 *            Hook that will run when the component is dragged
+	 */
 	public void applyTo(Component c, Runnable onPress, Runnable onRelease, Runnable onDrag)
 	{
 		this.c = c;
