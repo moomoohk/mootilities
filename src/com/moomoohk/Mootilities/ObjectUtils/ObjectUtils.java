@@ -51,20 +51,13 @@ public class ObjectUtils
 	 *            Extension of the file to load
 	 * @return The loaded object (will need to be casted)
 	 * @throws IOException
+	 * @throws ClassNotFoundException
 	 */
-	public static Object load(String path, String fileName, String extension) throws IOException
+	public static Object load(String path, String fileName, String extension) throws IOException, ClassNotFoundException
 	{
 		Object temp = null;
 		ObjectInputStream load = new ObjectInputStream(new FileInputStream(path + "/" + fileName + "." + extension));
-		try
-		{
-			temp = load.readUnshared();
-		}
-		catch (ClassNotFoundException e)
-		{
-			e.printStackTrace();
-			return null;
-		}
+		temp = load.readUnshared();
 		load.close();
 		return temp;
 	}

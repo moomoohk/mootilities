@@ -18,10 +18,9 @@ import com.moomoohk.Mootilities.FileUtils.FileUtils;
  */
 public class Downloader
 {
-	private static final long serialVersionUID = 9143454458576005733L;
 	private DownloadHandler handler;
 	private URL source;
-	private String dest;
+	private final String dest;
 
 	/**
 	 * Constructor.
@@ -84,26 +83,24 @@ public class Downloader
 			throw new IllegalStateException("Handler is null!");
 		try
 		{
-			File destFile = new File(dest);
+			File destFile = new File(this.dest);
 			if (!destFile.exists())
 			{
 				destFile.getParentFile().mkdirs();
 				destFile.createNewFile();
 			}
-			long filesize = getFilesize(source.toString());
+			long filesize = getFilesize(this.source.toString());
 			this.handler.gotFileSize(filesize);
-			FileOutputStream fos = new FileOutputStream(dest);
-			BufferedInputStream in = new BufferedInputStream(source.openStream());
+			FileOutputStream fos = new FileOutputStream(this.dest);
+			BufferedInputStream in = new BufferedInputStream(this.source.openStream());
 			BufferedOutputStream bout = new BufferedOutputStream(fos, 1024);
 			byte[] data = new byte[1024];
 			int x = 0;
-			int count = 0;
 			while ((x = in.read(data, 0, 1024)) >= 0)
 			{
 				final long pos = fos.getChannel().position();
 				this.handler.updateProgress(pos);
 				bout.write(data, 0, x);
-				++count;
 			}
 			bout.close();
 			in.close();
