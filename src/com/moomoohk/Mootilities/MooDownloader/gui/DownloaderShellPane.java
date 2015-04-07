@@ -20,7 +20,7 @@ import com.moomoohk.Mootilities.MooDownloader.Downloader;
 /**
  * Part of the {@link Downloader} GUI wrapper. <br>
  * Is used in the {@link DownloaderShell} class but can be implemented anywhere.
- * 
+ *
  * @author Meshulam Silk (moomoohk@ymail.com)
  * @since Dec 24, 2013
  */
@@ -30,16 +30,16 @@ public class DownloaderShellPane extends JPanel
 
 	private Downloader downloader;
 	private DownloaderWorker downloaderWorker;
-	private boolean indeterminate;
-	private String source, destination;
+	private final boolean indeterminate;
+	private final String source, destination;
 	private JProgressBar prog;
-	private JLabel downloading;
-	private JButton cancel;
+	private final JLabel downloading;
+	private final JButton cancel;
 	private String filesize;
 	private FilesizeScale scale;
 	private int cachedScaleIndex;
 	private long kbs;
-	private DownloaderShell parent;
+	private final DownloaderShell parent;
 
 	/**
 	 * Represents all the possible file size scales.
@@ -86,7 +86,9 @@ public class DownloaderShellPane extends JPanel
 
 	/**
 	 * Constructor.
-	 * 
+	 *
+	 * @param parent
+	 *            Parent shell that contains this pane
 	 * @param source
 	 *            URL to remote file to download
 	 * @param destination
@@ -101,7 +103,9 @@ public class DownloaderShellPane extends JPanel
 
 	/**
 	 * Constructor.
-	 * 
+	 *
+	 * @param parent
+	 *            Parent shell that contains this pane
 	 * @param source
 	 *            URL to remote file to download
 	 * @param destination
@@ -110,7 +114,6 @@ public class DownloaderShellPane extends JPanel
 	 *            True for an indeterminate download progress bar, false for a determinate bar
 	 * @param color
 	 *            Color of progress bar
-	 * @wbp.parser.constructor
 	 */
 	public DownloaderShellPane(DownloaderShell parent, String source, String destination, boolean indeterminate, Color color)
 	{
@@ -120,37 +123,38 @@ public class DownloaderShellPane extends JPanel
 		this.indeterminate = indeterminate;
 		this.source = source;
 		this.destination = destination;
-		downloading = new JLabel("Downloading " + source.substring(source.lastIndexOf("/") + 1));
-		cancel = new JButton("X");
-		cancel.setEnabled(false);
+		this.downloading = new JLabel("Downloading " + source.substring(source.lastIndexOf("/") + 1));
+		this.cancel = new JButton("X");
+		this.cancel.setEnabled(false);
 
 		SwingUtilities.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
-				prog = new JProgressBar();
-				prog.setStringPainted(true);
-				prog.setString("Download not started");
-				prog.setIndeterminate(true);
-				prog.setBounds(10, 25, 280, 30);
-				add(prog);
+				DownloaderShellPane.this.prog = new JProgressBar();
+				DownloaderShellPane.this.prog.setStringPainted(true);
+				DownloaderShellPane.this.prog.setString("Download not started");
+				DownloaderShellPane.this.prog.setIndeterminate(true);
+				DownloaderShellPane.this.prog.setBounds(10, 25, 280, 30);
+				add(DownloaderShellPane.this.prog);
 			}
 		});
 
-		downloading.setBounds(10, 0, 280, 30);
-		cancel.setBounds(300, 24, 43, 30);
-		cancel.addActionListener(new ActionListener()
+		this.downloading.setBounds(10, 0, 280, 30);
+		this.cancel.setBounds(300, 24, 43, 30);
+		this.cancel.addActionListener(new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
-				downloaderWorker.finish();
-				downloader.cleanUp();
+				DownloaderShellPane.this.downloaderWorker.finish();
+				DownloaderShellPane.this.downloader.cleanUp();
 			}
 		});
 
-		add(downloading);
-		add(cancel);
+		add(this.downloading);
+		add(this.cancel);
 	}
 
 	/**
@@ -160,17 +164,19 @@ public class DownloaderShellPane extends JPanel
 	{
 		SwingUtilities.invokeLater(new Runnable()
 		{
+			@Override
 			public void run()
 			{
-				cancel.setEnabled(true);
-				prog.setString("Waiting...");
+				DownloaderShellPane.this.cancel.setEnabled(true);
+				DownloaderShellPane.this.prog.setString("Waiting...");
 			}
 		});
 		final Thread t = new Thread(new Runnable()
 		{
+			@Override
 			public void run()
 			{
-				while (!downloaderWorker.isCancelled() && !downloaderWorker.isDone())
+				while (!DownloaderShellPane.this.downloaderWorker.isCancelled() && !DownloaderShellPane.this.downloaderWorker.isDone())
 				{
 					try
 					{
@@ -180,14 +186,14 @@ public class DownloaderShellPane extends JPanel
 					{
 						//There's no need to catch this...
 					}
-					long deltaBytes = (downloaderWorker.getPosition() - kbs) / 1024L;
-					downloading.setText("Downloading " + source.substring(source.lastIndexOf("/") + 1) + " (" + (deltaBytes) + "KB/s)");
-					kbs = downloaderWorker.getPosition();
+					long deltaBytes = (DownloaderShellPane.this.downloaderWorker.getPosition() - DownloaderShellPane.this.kbs) / 1024L;
+					DownloaderShellPane.this.downloading.setText("Downloading " + DownloaderShellPane.this.source.substring(DownloaderShellPane.this.source.lastIndexOf("/") + 1) + " (" + (deltaBytes) + "KB/s)");
+					DownloaderShellPane.this.kbs = DownloaderShellPane.this.downloaderWorker.getPosition();
 				}
 			}
 		}, "KB/s Thread");
-		downloader = new Downloader(source, destination);
-		downloaderWorker = new DownloaderWorker(downloader)
+		this.downloader = new Downloader(this.source, this.destination);
+		this.downloaderWorker = new DownloaderWorker(this.downloader)
 		{
 			@Override
 			public void handleException(Exception e)
@@ -197,9 +203,9 @@ public class DownloaderShellPane extends JPanel
 				e.printStackTrace();
 				cancel(true);
 				t.interrupt();
-				parent.removeFromList(DownloaderShellPane.this, true);
-				downloader.cleanUp();
-				new ExceptionDisplayDialog(parent, e).setVisible(true);
+				DownloaderShellPane.this.parent.removeFromList(DownloaderShellPane.this, true);
+				DownloaderShellPane.this.downloader.cleanUp();
+				new ExceptionDisplayDialog(DownloaderShellPane.this.parent, e).setVisible(true);
 			}
 
 			@Override
@@ -207,7 +213,7 @@ public class DownloaderShellPane extends JPanel
 			{
 				cancel(true);
 				t.interrupt();
-				parent.removeFromList(DownloaderShellPane.this, false);
+				DownloaderShellPane.this.parent.removeFromList(DownloaderShellPane.this, false);
 			}
 
 			@Override
@@ -221,48 +227,49 @@ public class DownloaderShellPane extends JPanel
 					tempSize /= 1024;
 					i++;
 				}
-				scale = FilesizeScale.values()[i];
-				cachedScaleIndex = i;
+				DownloaderShellPane.this.scale = FilesizeScale.values()[i];
+				DownloaderShellPane.this.cachedScaleIndex = i;
 				DownloaderShellPane.this.filesize = ("" + tempSize).substring(0, ("" + tempSize).indexOf(".") + 2);
 				SwingUtilities.invokeLater(new Runnable()
 				{
 					@Override
 					public void run()
 					{
-						prog.setMaximum((int) filesize);
+						DownloaderShellPane.this.prog.setMaximum((int) filesize);
 						double temp = filesize;
-						for (int i = 1; i <= cachedScaleIndex; i++)
+						for (int i = 1; i <= DownloaderShellPane.this.cachedScaleIndex; i++)
 							temp /= 1024;
-						if (!indeterminate)
-							prog.setString("0" + scale + "/" + ("" + temp).substring(0, ("" + temp).indexOf(".") + 2) + scale);
+						if (!DownloaderShellPane.this.indeterminate)
+							DownloaderShellPane.this.prog.setString("0" + DownloaderShellPane.this.scale + "/" + ("" + temp).substring(0, ("" + temp).indexOf(".") + 2) + DownloaderShellPane.this.scale);
 						else
-							prog.setString("0" + scale);
+							DownloaderShellPane.this.prog.setString("0" + DownloaderShellPane.this.scale);
 					}
 				});
 				t.start();
 			}
 		};
-		downloader.setHandler(downloaderWorker);
-		downloaderWorker.addPropertyChangeListener(new PropertyChangeListener()
+		this.downloader.setHandler(this.downloaderWorker);
+		this.downloaderWorker.addPropertyChangeListener(new PropertyChangeListener()
 		{
+			@Override
 			public void propertyChange(PropertyChangeEvent evt)
 			{
 				if ("progress".equals(evt.getPropertyName()))
 				{
-					prog.setIndeterminate(indeterminate);
-					long position = downloaderWorker.getPosition();
-					prog.setValue((int) position);
+					DownloaderShellPane.this.prog.setIndeterminate(DownloaderShellPane.this.indeterminate);
+					long position = DownloaderShellPane.this.downloaderWorker.getPosition();
+					DownloaderShellPane.this.prog.setValue((int) position);
 					double temp = position;
-					for (int i = 1; i <= cachedScaleIndex; i++)
+					for (int i = 1; i <= DownloaderShellPane.this.cachedScaleIndex; i++)
 						temp /= 1024;
-					if (!indeterminate)
-						prog.setString(("" + temp).substring(0, ("" + temp).indexOf(".") + 2) + "" + scale + "/" + filesize + scale);
+					if (!DownloaderShellPane.this.indeterminate)
+						DownloaderShellPane.this.prog.setString(("" + temp).substring(0, ("" + temp).indexOf(".") + 2) + "" + DownloaderShellPane.this.scale + "/" + DownloaderShellPane.this.filesize + DownloaderShellPane.this.scale);
 					else
-						prog.setString(("" + temp).substring(0, ("" + temp).indexOf(".") + 2) + "" + scale);
+						DownloaderShellPane.this.prog.setString(("" + temp).substring(0, ("" + temp).indexOf(".") + 2) + "" + DownloaderShellPane.this.scale);
 				}
 			}
 		});
-		downloaderWorker.execute();
+		this.downloaderWorker.execute();
 	}
 
 	/**
@@ -270,7 +277,7 @@ public class DownloaderShellPane extends JPanel
 	 */
 	public void cleanUp()
 	{
-		downloader.cleanUp();
+		this.downloader.cleanUp();
 	}
 
 	/**
@@ -278,6 +285,6 @@ public class DownloaderShellPane extends JPanel
 	 */
 	public void cancel()
 	{
-		downloaderWorker.finish();
+		this.downloaderWorker.finish();
 	}
 }
