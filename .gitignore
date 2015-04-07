@@ -1,6 +1,3 @@
-bin/*
-*.class
-JavaDoc/*
-.classpath
-.DS_Store
-.settings/
+bin/
+.DS_STORE
+.project
